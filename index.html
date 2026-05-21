@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCZ Weerstation Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen font-sans">
+
+    <header class="bg-gray-800 border-b border-gray-700 p-6 text-center shadow-lg">
+        <h1 class="text-3xl font-bold tracking-wide text-blue-400">RCZ Weerstation Dashboard</h1>
+        <p class="text-gray-400 text-sm mt-1">Live sensordata gehost op Raspberry Pi 5 NAS</p>
+        <p class="text-xs text-gray-500 mt-2">Laatste meting ontvangen om: <span id="update-time" class="font-mono text-blue-300">Laden...</span></p>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-6 mt-6">
+
+        <h2 class="text-xl font-semibold mb-4 text-gray-400 border-b border-gray-800 pb-2">Hoofdsensoren</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            
+            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-5 shadow-md flex flex-col justify-between">
+                <div>
+                    <span class="text-xs uppercase tracking-wider text-red-400 font-semibold">Buiten Temp</span>
+                    <p class="text-xs text-gray-400">Pico Hoofdsensor</p>
+                </div>
+                <div class="text-4xl font-black my-4 text-white" id="buiten-temp">--.- °C</div>
+            </div>
+
+            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-5 shadow-md flex flex-col justify-between">
+                <div>
+                    <span class="text-xs uppercase tracking-wider text-blue-400 font-semibold">Luchtvochtigheid</span>
+                    <p class="text-xs text-gray-400">BME688 Sensor</p>
+                </div>
+                <div class="text-4xl font-black my-4 text-white" id="luchtvochtigheid">-- %</div>
+            </div>
+
+            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-5 shadow-md flex flex-col justify-between">
+                <div>
+                    <span class="text-xs uppercase tracking-wider text-green-400 font-semibold">Luchtdruk</span>
+                    <p class="text-xs text-gray-400">Atmosferische druk</p>
+                </div>
+                <div class="text-4xl font-black my-4 text-white" id="luchtdruk">---- hPa</div>
+            </div>
+
+            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-5 shadow-md flex flex-col justify-between">
+                <div>
+                    <span class="text-xs uppercase tracking-wider text-purple-400 font-semibold">Luchtkwaliteit</span>
+                    <p class="text-xs text-gray-400">Gasweerstand</p>
+                </div>
+                <div class="text-2xl sm:text-3xl lg:text-4xl font-black my-4 text-white transition-colors duration-500" id="luchtkwaliteit">Laden...</div>
+            </div>
+
+        </div>
+
+        <h2 class="text-xl font-semibold mb-4 text-gray-400 border-b border-gray-800 pb-2">Meteo & Systeem</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+
+            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-5 shadow-md">
+                <span class="text-xs uppercase tracking-wider text-orange-400 font-semibold">Wind</span>
+                <div class="text-3xl font-black my-3 text-white" id="wind-snelheid">--.- km/u</div>
+                <p class="text-xs text-gray-400" id="wind-richting">Richting: --</p>
+            </div>
+
+            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-5 shadow-md">
+                <span class="text-xs uppercase tracking-wider text-teal-400 font-semibold">Neerslag</span>
+                <div class="text-3xl font-black my-3 text-white" id="neerslag">--.- mm</div>
+                <p class="text-xs text-gray-400">Regenmeter</p>
+            </div>
+
+            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-5 shadow-md">
+                <span class="text-xs uppercase tracking-wider text-pink-400 font-semibold">BME Temp</span>
+                <div class="text-3xl font-black my-3 text-white" id="bme-temp">--.- °C</div>
+                <p class="text-xs text-gray-400">Interne Chip Temp</p>
+            </div>
+
+        </div>
+
+        <h2 class="text-xl font-semibold mb-4 text-gray-400 border-b border-gray-800 pb-2">Dakbedekking Analyse</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <div class="bg-gray-800 border border-green-900/50 bg-gradient-to-br from-gray-800 to-green-950/20 rounded-2xl p-6 shadow-md flex justify-between items-center">
+                <div>
+                    <span class="text-sm font-bold text-green-400">Groen Dak</span>
+                    <p class="text-xs text-gray-400 mt-1">Temperatuur substraat</p>
+                </div>
+                <div class="text-4xl font-black text-white" id="groen-dak-temp">--.-°C</div>
+            </div>
+
+            <div class="bg-gray-800 border border-amber-900/50 bg-gradient-to-br from-gray-800 to-amber-950/20 rounded-2xl p-6 shadow-md flex justify-between items-center">
+                <div>
+                    <span class="text-sm font-bold text-amber-400">Gewoon Dak</span>
+                    <p class="text-xs text-gray-400 mt-1">Temperatuur dakbedekking</p>
+                </div>
+                <div class="text-4xl font-black text-white" id="gewoon-dak-temp">--.-°C</div>
+            </div>
+
+            <div class="bg-gray-800 border border-slate-700/50 bg-gradient-to-br from-gray-800 to-slate-900/30 rounded-2xl p-6 shadow-md flex justify-between items-center">
+                <div>
+                    <span class="text-sm font-bold text-slate-400">Grijs Dak</span>
+                    <p class="text-xs text-gray-400 mt-1">Temperatuur grind/beton</p>
+                </div>
+                <div class="text-4xl font-black text-white" id="grijs-dak-temp">--.-°C</div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

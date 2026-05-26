@@ -1,6 +1,5 @@
-// CONFIGURATIE - Vul jullie eigen Adafruit IO gegevens in
-const AIO_USERNAME = "Jazperz";
-const AIO_KEY = "aio_sLMF58nQvIuTM2y64znbWtIhuaQ6";
+// CONFIGURATIE - Je API Key is hier nu 100% verdwenen! Dit is volledig veilig voor GitHub.
+const PROXY_URL = "https://weerstation-backend.vercel.app/api/weerdata"; 
 
 const FEEDS = {
     buitenTemp: "bme-temp",
@@ -42,25 +41,23 @@ function getAirQualityInfo(weerstand) {
     return { status: "Slecht", scoreTekst, rawFormatted, color: "text-red-500" };
 }
 
-// Algemene functie om de laatste waarde uit een feed te trekken
+// Algemene functie om de laatste waarde uit een feed te trekken via de Vercel-proxy
 async function fetchLastValue(feedKey) {
-    const url = `https://io.adafruit.com/api/v2/${AIO_USERNAME}/feeds/${feedKey}/data/last`;
+    // We roepen onze eigen beveiligde Vercel-functie aan en sturen de feed-naam mee als query parameter
+    const url = `${PROXY_URL}?feed=${feedKey}`;
     try {
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: { 'X-AIO-Key': AIO_KEY }
-        });
-        if (!response.ok) throw new Error(`Feed ${feedKey} onbereikbaar of bestaat niet`);
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Feed ${feedKey} onbereikbaar via proxy`);
         return await response.json();
     } catch (error) {
-        console.error(`Fout bij ophalen van ${feedKey}:`, error);
+        console.error(`Fout bij ophalen via proxy voor ${feedKey}:`, error);
         return null;
     }
 }
 
 // Hoofdfunctie om alle sensoren te updaten op het scherm
 async function updateDashboard() {
-    console.log("Weerstation data synchroniseren (elke 10s)...");
+    console.log("Weerstation data via Vercel proxy synchroniseren (elke 10s)...");
 
     // Haal alle data parallel (tegelijkertijd) op voor maximale snelheid
     const [

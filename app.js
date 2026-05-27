@@ -1,5 +1,5 @@
-// CONFIGURATIE - Je API Key is hier nu 100% verdwenen! Dit is volledig veilig voor GitHub.
-const PROXY_URL = "https://weerstation-backend.vercel.app/api/weerdata"; 
+// CONFIGURATIE - De hoofd-URL van je Vercel backend
+const PROXY_URL = "https://weerstation-backend.vercel.app"; 
 
 const FEEDS = {
     buitenTemp: "bme-temp",
@@ -43,8 +43,8 @@ function getAirQualityInfo(weerstand) {
 
 // Algemene functie om de laatste waarde uit een feed te trekken via de Vercel-proxy
 async function fetchLastValue(feedKey) {
-    // We roepen onze eigen beveiligde Vercel-functie aan en sturen de feed-naam mee als query parameter
-    const url = `${PROXY_URL}?feed=${feedKey}`;
+    // We plakken hier het exacte api pad achter de hoofd proxy URL
+    const url = `${PROXY_URL}/api/weerdata?feed=${feedKey}`;
     try {
         const response = await fetch(url);
         if (!response.ok) throw new Error(`Feed ${feedKey} onbereikbaar via proxy`);
@@ -79,28 +79,27 @@ async function updateDashboard() {
     // ---- DATA IN DE HTML PLAATSEN ----
 
     // 1. Buiten Temperatuur
-    if (buitenTempData) {
+    if (buitenTempData && buitenTempData.value) {
         document.getElementById('buiten-temp').innerText = `${parseFloat(buitenTempData.value).toFixed(1)} °C`;
         const timestamp = new Date(buitenTempData.created_at);
         document.getElementById('update-time').innerText = timestamp.toLocaleTimeString('nl-NL');
     }
 
     // 2. Luchtvochtigheid
-    if (humidityData) {
+    if (humidityData && humidityData.value) {
         document.getElementById('luchtvochtigheid').innerText = `${parseInt(humidityData.value)} %`;
     }
 
     // 3. Luchtdruk
-    if (pressureData) {
+    if (pressureData && pressureData.value) {
         document.getElementById('luchtdruk').innerText = `${parseInt(pressureData.value)} hPa`;
     }
 
-    // 4. Luchtkwaliteit (Met status, score én de kleine MΩ waarde eronder)
-    if (gasData) {
+    // 4. Luchtkwaliteit
+    if (gasData && gasData.value) {
         const aq = getAirQualityInfo(gasData.value);
         const aqElement = document.getElementById('luchtkwaliteit');
         
-        // We bouwen de HTML hier dynamisch op zodat de MΩ waarde er klein onder komt te staan
         aqElement.innerHTML = `
             <div>${aq.status} <span class="text-xl sm:text-2xl font-bold opacity-90">(${aq.scoreTekst})</span></div>
             <span class="block text-xs font-normal text-gray-400 mt-1 tracking-normal">Ruwe weerstand: ${aq.rawFormatted}</span>
@@ -109,42 +108,39 @@ async function updateDashboard() {
     }
 
     // 5. Wind Snelheid & Richting
-    if (windSpeedData) {
+    if (windSpeedData && windSpeedData.value) {
         document.getElementById('wind-snelheid').innerText = `${parseFloat(windSpeedData.value).toFixed(1)} km/u`;
     }
-    if (windDirData) {
+    if (windDirData && windDirData.value) {
         document.getElementById('wind-richting').innerText = `Richting: ${windDirData.value}`;
     }
 
     // 6. Neerslag
-    if (rainData) {
+    if (rainData && rainData.value) {
         document.getElementById('neerslag').innerText = `${parseFloat(rainData.value).toFixed(1)} mm`;
     }
 
     // 7. Interne BME Temp
-    if (bmeTempData) {
+    if (bmeTempData && bmeTempData.value) {
         document.getElementById('bme-temp').innerText = `${parseFloat(bmeTempData.value).toFixed(1)} °C`;
     }
 
-    // 8. Daken Info (Nu volledig functioneel voor Groen, Gewoon en Grijs)
-    if (dakenInfoData) {
-        const tekst = dakenInfoData.value; // Verwacht formaat: "Groen: 17.2C | Gewoon: 21.0C | Grijs: 19.5C"
+    // 8. Daken Info
+    if (dakenInfoData && dakenInfoData.value) {
+        const tekst = dakenInfoData.value; 
         const groenDakElement = document.getElementById('groen-dak-temp');
         const gewoonDakElement = document.getElementById('gewoon-dak-temp');
         const grijsDakElement = document.getElementById('grijs-dak-temp');
         
         if (groenDakElement && gewoonDakElement && grijsDakElement) {
             try {
-                // Splits de string op het '|' teken
                 const delen = tekst.split('|');
-                
-                // Vul alle drie de vakjes in en haal de labels zoals "Grijs:" weg
                 groenDakElement.innerText = delen[0].replace('Groen:', '').trim();
                 gewoonDakElement.innerText = delen[1].replace('Gewoon:', '').trim();
                 grijsDakElement.innerText = delen[2].replace('Grijs:', '').trim();
             } catch (e) {
                 console.error("Fout bij het splitsen van dakenInfo string:", e);
-                groenDakElement.innerText = tekst; // Fallback mocht de string breken
+                groenDakElement.innerText = tekst; 
             }
         }
     }
